@@ -103,9 +103,12 @@ public class MainActivity extends AppCompatActivity {
         sendPostRequestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createOneUserRecord = new UserInsertOneRecord(); // 서버에 보낼 요청값을 생성합니다.
-                createOneUserRecord.setName(inputUserName.getText().toString()); // name값을 입력합니다.
-                createOneUserRecord.setJob(inputUserJob.getText().toString()); // job값을 입력합니다.
+                createOneUserRecord = new UserInsertOneRecord(
+                        inputUserName.getText().toString(),
+                        inputUserJob.getText().toString()
+                ); // 서버에 보낼 요청값을 생성합니다.
+                // createOneUserRecord.setName(inputUserName.getText().toString()); // name값을 입력합니다.
+                // createOneUserRecord.setJob(inputUserJob.getText().toString()); // job값을 입력합니다.
 
                 // 해당 createOneUserRecord데이터를 서버쪽으로 요청합니다.
                 requestUser.postOneUser(createOneUserRecord).enqueue(new Callback<UserGetOneRecord>() {
