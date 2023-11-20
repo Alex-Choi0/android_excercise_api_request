@@ -13,7 +13,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 
@@ -37,17 +39,37 @@ public class MainActivity extends AppCompatActivity {
         // 변수 uid는 @GET요청의 {uid}와 연결하기 위해서 앞단에 @Path("uid")를 추가하여 요청시 해당 uid값이 바르게 입력되도록 한다.
         Call<UserSingleData> getOneUser(@Path("uid") int uid);
 
+        // Post요청을 주는 주소는 /api/users
+        @POST("/api/users")
+        Call<UserGetOneRecord> postOneUser(@Body UserInsertOneRecord users);
+
     }
+
+    Button sendPostRequestBtn;
+    EditText inputUserName;
+    EditText inputUserJob;
+    TextView responseDataPost;
+
+    // API의 POST요청후 응답받을 값을 저의
+    UserGetOneRecord requestInsertUser;
+    UserInsertOneRecord createOneUserRecord;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // activity_main.xml의 View와 Java를 연결한다.
+        // activity_main.xml의 View와 Java를 연결한다.(GET 부분)
         sendGetRequestBtn = findViewById(R.id.button);
         responseData = findViewById(R.id.textView);
         inputUserId = findViewById(R.id.editTextNumber);
+
+        // activity_main.xml의 View와 Java를 연결합니다(POST 부분)
+        sendPostRequestBtn = findViewById(R.id.button2);
+        inputUserName = findViewById(R.id.editTextName);
+        inputUserJob = findViewById(R.id.editTextJob);
+        responseDataPost = findViewById(R.id.textViewJob);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://reqres.in") // Base URL을 입력한다.
@@ -76,5 +98,41 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+
+        sendPostRequestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createOneUserRecord = new UserInsertOneRecord(
+                        inputUserName.getText().toString(),
+                        inputUserJob.getText().toString()
+                ); // 서버에 보낼 요청값을 생성합니다.
+                // createOneUserRecord.setName(inputUserName.getText().toString()); // name값을 입력합니다.
+                // createOneUserRecord.setJob(inputUserJob.getText().toString()); // job값을 입력합니다.
+
+                // 해당 createOneUserRecord데이터를 서버쪽으로 요청합니다.
+                requestUser.postOneUser(createOneUserRecord).enqueue(new Callback<UserGetOneRecord>() {
+                    @Override
+                    public void onResponse(Call<UserGetOneRecord> call, Response<UserGetOneRecord> response) {
+                        // 정상적으로 응답이 올경우 아래와 같이 TextView에 표시합니다.
+                        responseDataPost.setText(
+                                "id : " + response.body().getId() + "\n"
+                                + "name : " + response.body().getName() + "\n"
+                                + "job : " + response.body().getJob() + "\n"
+                                + "createdAt : " + response.body().getCreatedAt() + "\n"
+
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(Call<UserGetOneRecord> call, Throwable t) {
+                        responseData.setText(t.getMessage());
+
+                    }
+                });
+
+            }
+        });
+
     }
 }
