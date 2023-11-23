@@ -15,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
         @GET("/api/users/{uid}")
         // Call은 해당 API를 요청시 서버에서 받을수 있는 데이터 양식(JSON)을 정의해 준다. UserSingleData대로 서버에서 응답이 온다.
         // 변수 uid는 @GET요청의 {uid}와 연결하기 위해서 앞단에 @Path("uid")를 추가하여 요청시 해당 uid값이 바르게 입력되도록 한다.
-        Call<UserSingleData> getOneUser(@Path("uid") int uid);
+        // @Header추가하고 "Authorization"에 대한 헤더를 만든다. 해당 헤더는 String값이 들어가기 때분에 아래처럼 코드를 수정한다.
+        Call<UserSingleData> getOneUser(@Header ("Authorization") String authToken, @Path("uid") int uid);
 
         // Post요청을 주는 주소는 /api/users
         @POST("/api/users")
@@ -83,7 +85,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int uid = Integer.parseInt(inputUserId.getText().toString());
-                requestUser.getOneUser(uid).enqueue(new Callback<UserSingleData>() {
+                // JWT토큰은 헤더의 첫 부분에 Bearer(한칸 공백) 먼저 추가하고 뒤에 토큰을 넣습니다.
+                String token = "Bearer " + "testToekn";
+                // GET요청할때 Header에 토큰(token)을 넣고 서버에 요청을 한다.
+                requestUser.getOneUser(token, uid).enqueue(new Callback<UserSingleData>() {
                     @Override
                     public void onResponse(Call<UserSingleData> call, Response<UserSingleData> response) {
                         // 정상적으로 응답을 받을시
